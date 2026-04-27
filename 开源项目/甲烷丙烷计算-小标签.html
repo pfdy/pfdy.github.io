@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THC 标准气充装记录系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+body{padding:16px;background:#f5f7fa;min-height:100vh}
+.wrap{max-width:297mm;margin:0 auto;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.08);padding:20px 28px;border-radius:4px;border:2px solid #245eaf;outline:1px solid #d0d7de;outline-offset:4px}
+.print-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#245eaf;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer}
+.print-btn:hover{background:#1a4790}
+.title{text-align:center;padding:16px 0 20px;letter-spacing:14px;color:#1a1a2e;border-bottom:2px solid #e0e0e0;margin-bottom:18px;position:relative}
+.title::after{content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:80px;height:2px;background:#245eaf}
+table{border-collapse:collapse;width:100%;background:#fff;margin-bottom:14px;border:1px solid #999}
+td,th{border:1px solid #999;padding:7px 8px;text-align:center;vertical-align:middle}
+.sec{background:#245eaf;color:#fff;padding:9px 8px;letter-spacing:2px}
+.lbl{text-align:center;padding-left:12px;color:#2c3e50;background:#fafbfc}
+input[type="number"]{width:80px;height:32px;border:1px solid #d0d7de;text-align:center;padding:0 6px;color:#c0392b;outline:none;background:#fff;border-radius:3px}
+input[type="number"]:focus{border-color:#3b5998;background:#fffef0}
+.r{display:inline-block;min-width:70px;text-align:center;padding:3px 6px;color:#1a1a2e;background:#f8f9fa;border-radius:3px}
+table:last-of-type .lbl{background:#f0f4f8}
+.remark-wrap{background:#f8f9fa;border:1px solid #c8d1dc;border-radius:4px;padding:10px 14px;margin-bottom:12px}
+.remark-wrap input{border:none;border-bottom:1px solid #d0d7de;outline:none;width:calc(100% - 55px);padding:4px 6px;background:transparent}
+.remark-wrap input:focus{border-bottom-color:#245eaf}
+.note{text-align:center;color:#8896a4;margin-top:8px}
+#label{display:none}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:50mm 40mm portrait;margin:0}
+  html,body{height:auto!important;min-height:auto!important}
+  body{background:#fff!important;padding:0!important;margin:0!important}
+  .wrap,.remark-wrap,.note,.print-btn{display:none!important}
+  #label{display:block!important}
+  #label table{border-collapse:collapse;width:94%;margin:0 auto;line-height:1.2}
+  #label td{border:0.1mm solid #555;padding:0.3mm;text-align:center;vertical-align:middle;height:5mm;font-size:8pt;color:#000}
+  #label .lh{font-size:8pt;color:#000}
+  .label-title{text-align:center;margin-top:1.5mm;margin-bottom:1.5mm;color:#000;font-size:9pt}
+  .label-remark{text-align:center;margin-top:1.5mm;color:#000;font-size:8pt}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="title">THC 标 准 气 充 装 记 录</div>
+
+  <table>
+    <tr><td colspan="11" class="sec">理 论 计 算</td></tr>
+    <tr>
+      <td colspan="2" class="lbl">浓度单位</td>
+      <td colspan="2">ppm</td><td colspan="3">mg/m³</td><td colspan="2">mgC/m³</td><td colspan="2">ppmC</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="lbl">甲烷</td>
+      <td colspan="2"><input type="number" id="ch4_ppm" value="97" step="any" oninput="th('ch4','ppm')"></td>
+      <td colspan="3"><input type="number" id="ch4_mgm3" step="any" oninput="th('ch4','mgm3')"></td>
+      <td colspan="2"><input type="number" id="ch4_mgcm3" step="any" oninput="th('ch4','mgcm3')"></td>
+      <td colspan="2"><input type="number" id="ch4_ppmc" step="any" oninput="th('ch4','ppmc')"></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="lbl">丙烷</td>
+      <td colspan="2"><input type="number" id="c3_ppm" value="32.3" step="any" oninput="th('c3','ppm')"></td>
+      <td colspan="3"><input type="number" id="c3_mgm3" step="any" oninput="th('c3','mgm3')"></td>
+      <td colspan="2"><input type="number" id="c3_mgcm3" step="any" oninput="th('c3','mgcm3')"></td>
+      <td colspan="2"><input type="number" id="c3_ppmc" step="any" oninput="th('c3','ppmc')"></td>
+    </tr>
+    <tr>
+      <td colspan="2">理论摩尔</td>
+      <td colspan="5"><span class="r" id="v_mol">--</span> mol（8L 气瓶）</td>
+      <td colspan="4">室温 <input type="number" id="roomT" value="20.1" step="0.1" style="width:55px" oninput="run()"> °C</td>
+    </tr>
+    <tr><td colspan="11"><p class="note">💡 理论数值四列可任意修改，其余三列自动换算</p></td></tr>
+
+    <!-- 实际充装区 -->
+    <tr><td colspan="11" class="sec">实 际 充 装</td></tr>
+    <tr>
+      <td class="lbl">组份</td><td>分子量</td><td>纯度(%)</td><td>计算(g)</td>
+      <td>充装</td><td>量</td><td>摩尔数</td>
+      <td>组分</td><td>ppm</td><td>mg/m³</td><td>mgC/m³</td>
+    </tr>
+    <tr>
+      <td class="lbl">CH₄</td>
+      <td><span class="r" id="ch4_c">--</span></td>
+      <td><input type="number" id="ch4_p" value="100.00" step="0.01" min="0" max="100" oninput="validatePurity(this);run()"></td>
+      <td><span class="r" id="ch4_e">--</span></td>
+      <td><strong><span class="r" id="ch4_f">--</span></strong></td>
+      <td>ml</td>
+      <td><span class="r" id="ch4_h">--</span></td>
+      <td><span class="r" id="ch4_i">--</span></td>
+      <td><span class="r" id="ch4_j">--</span></td>
+      <td><span class="r" id="ch4_k">--</span></td>
+      <td><span class="r" id="ch4_l">--</span></td>
+    </tr>
+    <tr>
+      <td class="lbl">C₃H₈</td>
+      <td><span class="r" id="c3_c">--</span></td>
+      <td><input type="number" id="c3_p" value="100.00" step="0.01" min="0" max="100" oninput="validatePurity(this);run()"></td>
+      <td><span class="r" id="c3_e">--</span></td>
+      <td><strong><span class="r" id="c3_f">--</span></strong></td>
+      <td>ml</td>
+      <td><span class="r" id="c3_h">--</span></td>
+      <td><span class="r" id="c3_i">--</span></td>
+      <td><span class="r" id="c3_j">--</span></td>
+      <td><span class="r" id="c3_k">--</span></td>
+      <td><span class="r" id="c3_l">--</span></td>
+    </tr>
+    <tr>
+      <td class="lbl">N₂</td><td><span class="r">28.01</span></td><td>100</td>
+      <td><span class="r" id="n2_e">--</span></td>
+      <td><input type="number" id="n2_f" value="956" step="any" style="color:#c0392b" oninput="run()"></td>
+      <td>g</td><td><span class="r" id="n2_h">--</span></td>
+      <td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td class="lbl">Air</td><td><span class="r">28.85</span></td><td>100</td>
+      <td><span class="r" id="air_e">--</span></td>
+      <td><input type="number" id="air_f" value="0" step="any" style="color:#c0392b" oninput="run()"></td>
+      <td>g</td><td><span class="r" id="air_h">--</span></td><td></td><td></td>
+      <td colspan="3" style="text-align:center">
+        <button class="print-btn" onclick="window.print()">
+          🖨️ 打印
+        </button>
+      </td>
+    </tr>
+
+    <!-- 汇总行 -->
+    <tr>
+      <td class="lbl" colspan="2">烃总混合体积</td>
+      <td colspan="2"><span class="r" id="tot_vol">--</span> ml</td>
+      <td class="lbl" colspan="2">总摩尔数</td>
+      <td colspan="2"><span class="r" id="tot_mol">--</span></td>
+      <td class="lbl">总重量</td>
+      <td colspan="2"><span class="r" id="tot_wt">--</span> g</td>
+    </tr>
+    <tr><td colspan="11"><div class="remark-wrap"><input type="text" id="remark" oninput="document.getElementById('lp_remark').textContent=this.value"></div></td></tr>
+  </table>
+</div>
+
+<!-- 打印标签（50mm×40mm） -->
+<section id="label">
+  <div class="label-title">甲烷丙烷标准气</div>
+  <table>
+    <tr><td class="lh">组份</td><td class="lh">ppm</td><td class="lh">mg/m³</td><td class="lh">mgC/m³</td></tr>
+    <tr><td class="lh">CH₄</td><td class="lh" id="lp_ch4_j">--</td><td class="lh" id="lp_ch4_k">--</td><td class="lh" id="lp_ch4_l">--</td></tr>
+    <tr><td class="lh">C₃H₈</td><td class="lh" id="lp_c3_j">--</td><td class="lh" id="lp_c3_k">--</td><td class="lh" id="lp_c3_l">--</td></tr>
+    <tr><td class="lh">N₂</td><td class="lh" id="lp_n2_e">--</td><td class="lh">Air</td><td class="lh" id="lp_air_e">--</td></tr>
+  </table>
+  <div class="label-remark" id="lp_remark">--</div>
+</section>
+
+<script>
+/* ==================== 常量定义 ==================== */
+const F = {
+  ch4: {ppm2mg: 0.71607, ppm2mgC: 0.53616, ppm2ppmC: 1},
+  c3:  {ppm2mg: 1.96858, ppm2mgC: 1.60848, ppm2ppmC: 3},
+};
+const MW = {
+  ch4: 16.04, c3: 44.0962, n2: 28.01, air: 28.8479,
+};
+
+/* ==================== 工具函数 ==================== */
+const $  = id => document.getElementById(id);
+const v  = id => parseFloat($(id).value) || 0;
+const sv = (id, val) => {
+  const el = $(id);
+  if (document.activeElement !== el) el.value = isNaN(val) ? '' : val.toFixed(1);
+};
+const s = (id, val, dec = 4) => {
+  $(id).textContent = isNaN(val) ? '--' : val.toFixed(dec);
+};
+const sp = (id, val, p) => {
+  $(id).textContent = isNaN(val) ? '--' : val.toPrecision(p);
+};
+
+let _lock = false;
+
+/* ==================== 纯度验证 ==================== */
+function validatePurity(input) {
+  let val = parseFloat(input.value);
+  if (isNaN(val)) return;
+  if (val < 0) input.value = 0;
+  if (val > 100) input.value = 100;
+}
+
+/* ==================== 理论数值互算 ==================== */
+function th(gas, from) {
+  if (_lock) return;
+  _lock = true;
+  const f = F[gas];
+  const x = v(gas + '_' + from);
+  if (from === 'ppm') {
+    sv(gas + '_mgm3',  x * f.ppm2mg);
+    sv(gas + '_mgcm3', x * f.ppm2mgC);
+    sv(gas + '_ppmc',   x * f.ppm2ppmC);
+  } else {
+    const ratio = from === 'mgm3'  ? f.ppm2mg
+                : from === 'mgcm3' ? f.ppm2mgC
+                :                    f.ppm2ppmC;
+    const ppm = x / ratio;
+    sv(gas + '_ppm',   ppm);
+    sv(gas + '_mgm3',  ppm * f.ppm2mg);
+    sv(gas + '_mgcm3', ppm * f.ppm2mgC);
+    sv(gas + '_ppmc',   ppm * f.ppm2ppmC);
+  }
+  run();
+  _lock = false;
+}
+
+/* ==================== 全量计算 ==================== */
+function run() {
+  const ch4_ppm = v('ch4_ppm');
+  const c3_ppm  = v('c3_ppm');
+  const T       = v('roomT');
+  const TK      = 273.15 + T;
+
+  // 理论摩尔数
+  const mol = 34 * 293.15 / TK;
+  s('v_mol', mol);
+
+  // 甲烷
+  const c9  = TK / 273.15 * 22.36;
+  const e9  = mol * ch4_ppm * MW.ch4 / 1e6;
+  const f9  = e9 * 1000 * c9 / MW.ch4 / v('ch4_p') * 100;
+  const h9  = f9 / c9 / 1000;
+  const i9  = h9 * v('ch4_p') / 100;
+  s('ch4_c', c9); s('ch4_e', e9); sp('ch4_f', f9, 4);
+  s('ch4_h', h9, 6); s('ch4_i', i9, 6);
+
+  // 丙烷
+  const c10 = TK / 273.15 * 22.064;
+  const e10 = mol * c3_ppm * MW.c3 / 1e6;
+  const f10 = e10 * 1000 * c10 / MW.c3 / v('c3_p') * 100;
+  const h10 = f10 / c10 / 1000;
+  const i10 = h10 * v('c3_p') / 100;
+  s('c3_c', c10); s('c3_e', e10); sp('c3_f', f10, 4);
+  s('c3_h', h10, 6); s('c3_i', i10, 6);
+
+  // 氮气
+  const n2f = v('n2_f');
+  const e11 = (mol - h9 - h10) * MW.n2;
+  const h11 = n2f / MW.n2;
+  s('n2_e', Math.round(e11)); s('n2_h', h11, 5);
+
+  // 空气
+  const airf = v('air_f');
+  const e12  = (mol - h9 - h10) * MW.air;
+  const h12  = airf / MW.air;
+  s('air_e', Math.round(e12)); s('air_h', h12, 5);
+
+  // 总摩尔数
+  const e15 = h9 + h10 + h11 + h12;
+  const tC   = e15 > 0;
+
+  // 甲烷实际浓度
+  const j9 = tC ? i9 / e15 * 1e6 : 0;
+  sp('ch4_j', j9,                                3);
+  sp('ch4_k', j9 * MW.ch4 / 22.4,                 3);
+  sp('ch4_l', j9 * 12.01  / 22.4,                 3);
+
+  // 丙烷实际浓度
+  const j10 = tC ? i10 / e15 * 1e6 : 0;
+  sp('c3_j',  j10,                                3);
+  sp('c3_k',  j10 * MW.c3 / 22.4,                 3);
+  sp('c3_l',  j10 * 36.03 / 22.4,                 3);
+
+  // 汇总
+  s('tot_vol', f9 * v('ch4_p') * 0.99 / 100 + f10 * v('c3_p') * 0.99 / 100);
+  s('tot_mol', e15);
+  s('tot_wt',  h9 * 28.01 - i9 * 28.01 + h10 * 28.01 - i10 * 28.01 + e9 + e10 + n2f + airf);
+
+  // 标签打印数据同步
+  const fmt = (v) => isNaN(v) || v === 0 ? '--' : parseFloat(v.toPrecision(4));
+  $('lp_ch4_j').textContent = fmt(j9);
+  $('lp_ch4_k').textContent = fmt(j9 * MW.ch4 / 22.4);
+  $('lp_ch4_l').textContent = fmt(j9 * 12.01 / 22.4);
+  $('lp_c3_j').textContent  = fmt(j10);
+  $('lp_c3_k').textContent  = fmt(j10 * MW.c3 / 22.4);
+  $('lp_c3_l').textContent  = fmt(j10 * 36.03 / 22.4);
+  $('lp_n2_e').textContent  = n2f || '--';
+  $('lp_air_e').textContent = airf || '--';
+  $('lp_remark').textContent = $('remark').value;
+}
+
+/* ==================== 页面初始化 ==================== */
+window.addEventListener('DOMContentLoaded', () => {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const ts = d.getFullYear() + '年' + pad(d.getMonth()+1) + '月' + pad(d.getDate()) + '日 ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  $('remark').value = ts;
+  $('lp_remark').textContent = ts;
+  th('ch4', 'ppm');
+  th('c3', 'ppm');
+});
+</script>
+</body>
+</html>
