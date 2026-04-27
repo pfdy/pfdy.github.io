@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>在线计算器</title>
+<style>
+:root {
+  --bg: #e0e5ec;
+  --calc-bg: #1e293b;
+  --btn-bg: #334155;
+  --btn-text: #f8fafc;
+  --accent: #3b82f6;
+  --operator-color: #f59e0b;
+  --danger: #ef4444;
+  --shadow-light: #ffffff;
+  --shadow-dark: #a3b1c6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; user-select: none; }
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--bg);
+}
+
+.calculator {
+  background-color: var(--calc-bg);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 15px 15px 30px var(--shadow-dark), -15px -15px 30px var(--shadow-light);
+  width: 90%;
+  max-width: 400px;
+}
+
+.display {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 20px;
+  text-align: right;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: var(--btn-text);
+  font-size: 2.5rem;
+  outline: none;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+button {
+  padding: 15px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  box-shadow: 5px 5px 10px #0f172a, -5px -5px 10px #2d3748;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+button:active {
+  box-shadow: inset 5px 5px 10px #0f172a, inset -5px -5px 10px #2d3748;
+  transform: scale(0.98);
+}
+
+button.operator { color: var(--operator-color); font-weight: bold; }
+button.equals   { background-color: var(--accent); }
+button.clear    { background-color: var(--danger); }
+
+@media (max-width: 500px) {
+  .calculator {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .display {
+    font-size: 3rem;
+    flex-grow: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding-bottom: 40px;
+  }
+  .buttons { gap: 15px; padding-bottom: 20px; }
+  button { padding: 20px; font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="calculator">
+  <input type="text" class="display" id="display" readonly value="0">
+  <div class="buttons" id="buttons">
+    <button class="clear" data-val="AC">AC</button>
+    <button data-action="del">DEL</button>
+    <button class="operator" data-val="%">%</button>
+    <button class="operator" data-val="/">÷</button>
+
+    <button data-val="7">7</button>
+    <button data-val="8">8</button>
+    <button data-val="9">9</button>
+    <button class="operator" data-val="*">×</button>
+
+    <button data-val="4">4</button>
+    <button data-val="5">5</button>
+    <button data-val="6">6</button>
+    <button class="operator" data-val="-">−</button>
+
+    <button data-val="1">1</button>
+    <button data-val="2">2</button>
+    <button data-val="3">3</button>
+    <button class="operator" data-val="+">+</button>
+
+    <button data-val="00">00</button>
+    <button data-val="0">0</button>
+    <button data-val=".">.</button>
+    <button class="equals" data-action="calc">=</button>
+  </div>
+</div>
+
+<script>
+const display = document.getElementById('display');
+const buttons  = document.getElementById('buttons');
+let currentInput = '0';
+let shouldReset = false;
+
+const OPS = new Set(['+', '-', '*', '/', '%']);
+
+function update() { display.value = currentInput; }
+
+function clearDisplay() {
+  currentInput = '0';
+  shouldReset = false;
+  update();
+}
+
+function deleteLast() {
+  currentInput = (currentInput.length === 1 || currentInput === 'Error') ? '0' : currentInput.slice(0, -1);
+  update();
+}
+
+function appendNumber(num) {
+  if (currentInput === '0' || shouldReset) {
+    currentInput = num === '.' ? '0.' : num;
+    shouldReset = false;
+  } else {
+    if (num === '.' && currentInput.includes('.')) return;
+    currentInput += num;
+  }
+  update();
+}
+
+function appendOperator(op) {
+  const last = currentInput.slice(-1);
+  currentInput = OPS.has(last) ? currentInput.slice(0, -1) + op : currentInput + op;
+  shouldReset = false;
+  update();
+}
+
+function calculate() {
+  try {
+    // 安全计算：只允许数字和运算符参与计算
+    const sanitized = currentInput.replace(/[^0-9+\-*/.%()]/g, '');
+    const result = Function('"use strict"; return (' + sanitized + ')')();
+    if (!isFinite(result)) { currentInput = 'Error'; }
+    else { currentInput = parseFloat(result.toFixed(10)).toString(); }
+    shouldReset = true;
+  } catch {
+    currentInput = 'Error';
+    shouldReset = true;
+  }
+  update();
+}
+
+// 事件委托：统一处理按钮点击
+buttons.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  if (btn.dataset.action === 'del')  { deleteLast(); return; }
+  if (btn.dataset.action === 'calc') { calculate(); return; }
+  const val = btn.dataset.val;
+  if (val === 'AC') { clearDisplay(); return; }
+  if (OPS.has(val)) { appendOperator(val); }
+  else { appendNumber(val); }
+});
+
+// 键盘支持
+document.addEventListener('keydown', e => {
+  const k = e.key;
+  if (!isNaN(k) || k === '.') { appendNumber(k); }
+  else if (OPS.has(k) || k === '%') { appendOperator(k); }
+  else if (k === 'Enter' || k === '=') { e.preventDefault(); calculate(); }
+  else if (k === 'Backspace') { deleteLast(); }
+  else if (k === 'Escape') { clearDisplay(); }
+});
+</script>
+</body>
+</html>
