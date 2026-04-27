@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset=UTF-8>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>万年历</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft YaHei","Segoe UI",sans-serif;background:#e8ecf3;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:20px 0}
+.wrap{background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(36,94,175,.18);width:94vw;max-width:880px;overflow:hidden}
+.hd{background:#245eaf;color:#fff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.hd-title{font-size:18px;font-weight:700;letter-spacing:1px}
+.hd-nav{display:flex;align-items:center;gap:2px;font-size:13px;flex-wrap:wrap}
+.hd-nav button{font-family:inherit;font-size:13px;padding:3px 6px;border:none;background:transparent;color:#fff;cursor:pointer;white-space:nowrap}
+.hd-nav button:hover{background:rgba(255,255,255,.2)}
+.hd-nav select{font-family:inherit;font-size:13px;padding:1px 2px;border:1px solid rgba(255,255,255,.35);border-radius:3px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
+.hd-nav select option{color:#333}
+table{width:100%;table-layout:fixed;border-collapse:collapse}
+thead td{background:#f0f4fb;padding:8px 0;font-weight:600;color:#555;text-align:center;border-bottom:2px solid #245eaf;font-size:13px}
+thead td.sun{color:#C81115}
+thead td.sat{color:#1F6529}
+td.cell{text-align:center;padding:3px 2px;vertical-align:top;font-size:13px;border:1px solid #f0f0f0;height:64px;overflow:hidden}
+td.cell:hover{background:#eef3ff}
+td.cell .day{font-size:15px;font-weight:600;margin-bottom:1px}
+td.cell .lunar{font-size:11px;color:#888;line-height:1.4}
+td.cell .lunar.month{color:#245eaf;font-weight:700}
+td.cell .term{font-size:11px;color:#0a7a3e;line-height:1.4}
+td.other{background:#fafafa}
+td.other .day{color:#ccc !important}
+td.other .lunar{color:#ddd !important}
+td.cell.today{background:#dce6f7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <div class="hd-title" id="hdTitle"></div>
+    <div class="hd-nav">
+      <button onclick="chg(-1)">&#9664; 上月</button>
+      <select id="sy"></select>
+      <span style="color:rgba(255,255,255,.5);margin:0 1px;font-size:12px">年</span>
+      <select id="sm"></select>
+      <span style="color:rgba(255,255,255,.5);margin:0 1px;font-size:12px">月</span>
+      <button onclick="chg(1)">下月 &#9654;</button>
+      <button onclick="goToday()">今天</button>
+    </div>
+  </div>
+  <table>
+    <thead><tr>
+      <td class="sun">日</td><td>一</td><td>二</td><td>三</td><td>四</td><td>五</td><td class="sat">六</td>
+    </tr></thead>
+    <tbody id="tb"></tbody>
+  </table>
+</div>
+<script>
+var L=[0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0cab5,0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,0x05aa0,0x076a3,0x096d0,0x04bd7,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,0x14b63];
+var G=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+var Z=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+var A=["鼠","牛","虎","兔","龙","蛇","马","羊","猴","鸡","狗","猪"];
+var LM=["正","二","三","四","五","六","七","八","九","十","冬","腊"];
+var LD=["初一","初二","初三","初四","初五","初六","初七","初八","初九","初十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十","廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"];
+var ST=["小寒","大寒","立春","雨水","惊蛰","春分","清明","谷雨","立夏","小满","芒种","夏至","小暑","大暑","立秋","处暑","白露","秋分","寒露","霜降","立冬","小雪","大雪","冬至"];
+var STI=[0,21208,42467,63836,85337,107014,128867,150921,173149,195551,218072,240693,263343,285989,308563,331033,353350,375494,397447,419210,440795,462224,483532,504758];
+
+function lYearDays(y){
+  var s=348,i=0x8000;
+  for(;i>0x8;i>>=1){ if((L[y-1900]&i)!==0) s++; }
+  return s+((L[y-1900]&0xf)===0?0:((L[y-1900]&0x10000)!==0?30:29));
+}
+function leapMonth(y){ return L[y-1900]&0xf; }
+function leapDays(y){
+  if((L[y-1900]&0xf)===0) return 0;
+  return (L[y-1900]&0x10000)!==0?30:29;
+}
+function monthDays(y,m){ return (L[y-1900]&(0x10000>>m))!==0?30:29; }
+
+function s2l(yy,mm,dd){
+  if(yy<1900||yy>2100) return null;
+  var offset=Math.floor((Date.UTC(yy,mm-1,dd)-Date.UTC(1900,0,31))/86400000);
+  var i,temp;
+  for(i=1900;i<2101&&offset>0;i++){ temp=lYearDays(i); offset-=temp; }
+  if(offset<0){ offset+=temp; i--; }
+  var year=i,leapM=leapMonth(year),isLeap=false;
+  for(i=1;i<13&&offset>0;i++){
+    if(leapM>0&&i===(leapM+1)&&!isLeap){ --i; isLeap=true; temp=leapDays(year); }
+    else { temp=monthDays(year,i); }
+    if(isLeap&&i===(leapM+1)) isLeap=false;
+    offset-=temp;
+  }
+  if(offset===0&&leapM>0&&i===(leapM+1)){
+    if(isLeap){ isLeap=false; }else{ isLeap=true; --i; }
+  }
+  if(offset<0){ offset+=temp; --i; }
+  return {year:year,month:i,day:offset+1,isLeap:isLeap};
+}
+function cyclical(n){ return G[n%10]+Z[n%12]; }
+function sTerm(y,n){
+  var t=31556925974.7*(y-1900)+STI[n]*60000+Date.UTC(1900,0,6,2,5);
+  return new Date(t).getUTCDate();
+}
+
+var Y=new Date().getFullYear(), M=new Date().getMonth();
+var TODAY=new Date();
+var sy=document.getElementById("sy"),sm=document.getElementById("sm");
+for(var i=1900;i<=2100;i++) sy.add(new Option(i,i));
+for(var i=1;i<=12;i++) sm.add(new Option(i,i));
+sy.onchange=function(){ Y=parseInt(this.value,10); render(); };
+sm.onchange=function(){ M=parseInt(this.value,10)-1; render(); };
+
+function render(){
+  sy.value=Y; sm.value=M+1;
+  var tInfo=s2l(Y,M+1,1);
+  var lunarYearStr="万年历";
+  if(tInfo){
+    var dYear=tInfo.year, yIdx=dYear-1900+36;
+    lunarYearStr=cyclical(yIdx)+A[(dYear-4)%12]+"年";
+  }
+  document.getElementById("hdTitle").innerHTML=lunarYearStr;
+  var fd=new Date(Y,M,1).getDay(), totalCells=42;
+  var t1=sTerm(Y,M*2), t2=sTerm(Y,M*2+1);
+  var html="";
+  for(var i=0;i<totalCells;i++){
+    if(i%7===0) html+="<tr>";
+    var d=new Date(Y,M,i-fd+1);
+    var day=d.getDate(), dow=d.getDay();
+    var isOther=(d.getMonth()!==M);
+    var ln=s2l(d.getFullYear(),d.getMonth()+1,day);
+    var cls="cell", dayColor="#333", lh="", th="";
+    if(ln){
+      if(ln.day===1&&!isOther) lh='<div class="lunar month">'+LM[ln.month-1]+'月</div>';
+      else if(!isOther) lh='<div class="lunar">'+LD[ln.day-1]+'</div>';
+      if(!isOther){
+        if(day===t1) th='<div class="term">'+ST[M*2]+'</div>';
+        if(day===t2) th='<div class="term">'+ST[M*2+1]+'</div>';
+      }
+      if(isOther) cls+=" other";
+      else{
+        if(dow===0) dayColor="#C81115";
+        else if(dow===6) dayColor="#1F6529";
+        if(day===TODAY.getDate()&&d.getMonth()===TODAY.getMonth()&&d.getFullYear()===TODAY.getFullYear()) cls+=" today";
+      }
+      html+='<td class="'+cls+'"><div class="day" style="color:'+dayColor+'">'+day+'</div>'+lh+th+'</td>';
+    }else{
+      html+='<td class="cell other"></td>';
+    }
+    if(i%7===6) html+="</tr>";
+  }
+  document.getElementById("tb").innerHTML=html;
+}
+function chg(d){
+  M+=d;
+  var yr=Y+Math.floor(M/12);
+  M=((M%12)+12)%12;
+  Y=yr;
+  render();
+}
+function goToday(){ Y=new Date().getFullYear(); M=new Date().getMonth(); render(); }
+render();
+</script>
+</body>
+</html>
