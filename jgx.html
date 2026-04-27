@@ -1,48 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset="UTF-8" />
+<meta charset="UTF-8">
 <title>人生计时</title>
 </head>
-<body style="margin:0">
-<span style="font-size:9px;color:#666666;" class="count"></span>
+<body style="margin:0;font-size:9px;color:#666;">
+<span class="count"></span>
 <script>
-	window.onload = function () {
-	countDown();
-function addZero(i) {
-	return i < 10 ? "0" + i: i + "";
-	}
-function countDown() {
-	var endtime=new Date("1986/10/12,12:40:00");
-	var nowtime=new Date();
-	var lefttime=parseInt((nowtime.getTime()-endtime.getTime())/1000);
-	var d=parseInt(lefttime/(24*60*60))
-	var h=parseInt(lefttime/(60 * 60) % 24);
-	var m=parseInt(lefttime/60 % 60);
-	var s=parseInt(lefttime%60);
-	d=addZero(d)
-	h=addZero(h);
-	m=addZero(m);
-	s=addZero(s);
-	document.querySelector(".count").innerHTML=`人生的第${d}天`;
-if (lefttime<=0) {
-	document.querySelector(".count").innerHTML="计算结果为负数";
-	return;
-	 }
-	setTimeout(countDown,1000);
-	}
-	}
+(function () {
+  function fmt(n) { return n < 10 ? "0" + n : n; }
+  function tick() {
+    var t = Math.floor((Date.now() - Date.parse("1986/10/12 12:40:00")) / 1000);
+    if (t < 0) { document.querySelector(".count").textContent = "计时结束"; return; }
+    var d = Math.floor(t / 86400);
+    document.querySelector(".count").textContent = "人生的第 " + d + " 天";
+    setTimeout(tick, 1000);
+  }
+  tick();
+})();
 </script>
-<!--百度统计代码开始-->
+<!-- 百度统计 -->
 <script>
 var _hmt = _hmt || [];
 (function() {
   var hm = document.createElement("script");
   hm.src = "https://hm.baidu.com/hm.js?ade1f55980fe86044f6a78f9c81d4c01";
-  var s = document.getElementsByTagName("script")[0]; 
+  var s = document.getElementsByTagName("script")[0];
   s.parentNode.insertBefore(hm, s);
 })();
 </script>
-<!--百度统计代码结束-->
 </body>
 </html>
