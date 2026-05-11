@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>标签打印</title>
+    <style>
+        @page {
+            size: 50mm 40mm;
+            margin: 0mm;
+        }
+
+        @media print {
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 50mm;
+                height: 40mm;
+                overflow: hidden;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            body > *:not(svg) {
+                display: none !important;
+            }
+
+            svg {
+                display: block;
+                page-break-inside: avoid;
+            }
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: sans-serif;
+        }
+
+        svg {
+            width: 50mm;
+            height: 40mm;
+        }
+
+        .controls {
+            margin-top: 12px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .controls label {
+            font-size: 14px;
+        }
+
+        .controls input {
+            width: 100px;
+            padding: 4px 8px;
+            font-size: 16px;
+            border: 1px solid #999;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        button {
+            margin-top: 8px;
+            padding: 8px 24px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320">
+        <!-- 表格可见边框 384×288，居中于 400×320 画布 -->
+        <!-- 描边 16px 向外扩展 8px，rect 几何位置内缩 8px 使可见边框正确定位 -->
+        <rect x="16" y="24" width="368" height="272" fill="#FFF" stroke="#000" stroke-width="15" />
+        <!-- 分割线 -->
+        <line x1="16" y1="160" x2="384" y2="160" stroke="#000" stroke-width="15" />
+        <!-- 第一行文字（单元格高144，文字高95%=137） -->
+        <text id="text1" x="200" y="91" font-size="132" font-weight="900" fill="#000" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">
+            20
+        </text>
+        <!-- 第二行文字 -->
+        <text id="text2" x="200" y="226" font-size="132" font-weight="900" fill="#000" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">
+            1956
+        </text>
+    </svg>
+
+    <div class="controls">
+        <label>第一行：<input id="input1" type="text" value="20" placeholder="20" oninput="updateText()" /></label>
+        <label>第二行：<input id="input2" type="text" value="1956" placeholder="1956" oninput="updateText()" /></label>
+    </div>
+    <button onclick="window.print()">打印</button>
+
+    <script>
+        function updateText() {
+            var t1 = document.getElementById('input1').value || document.getElementById('input1').placeholder;
+            var t2 = document.getElementById('input2').value || document.getElementById('input2').placeholder;
+            document.getElementById('text1').textContent = t1;
+            document.getElementById('text2').textContent = t2;
+        }
+    </script>
+</body>
+
+</html>
