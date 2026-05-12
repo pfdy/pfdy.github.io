@@ -1,34 +1,97 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset=UTF-8>
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>万年历</title>
 <style>
+:root{
+  --primary:#245eaf;
+  --text:#2d3436;
+  --text-m:#636e72;
+  --text-l:#999;
+  --bg:#e8ecf3;
+  --bdr:#eee
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Microsoft YaHei","Segoe UI",sans-serif;background:#e8ecf3;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:20px 0}
-.wrap{background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(36,94,175,.18);width:94vw;max-width:880px;overflow:hidden}
-.hd{background:#245eaf;color:#fff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}
+body{font-family:-apple-system,"Microsoft YaHei","Segoe UI",sans-serif;background:var(--bg);display:flex;justify-content:center;padding:10px 0}
+
+.wrap{background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.08);width:96vw;max-width:900px;overflow:hidden}
+
+/* 标题栏 */
+.hd{background:var(--primary);color:#fff;padding:10px 15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .hd-title{font-size:18px;font-weight:700;letter-spacing:1px}
-.hd-nav{display:flex;align-items:center;gap:2px;font-size:13px;flex-wrap:wrap}
-.hd-nav button{font-family:inherit;font-size:13px;padding:3px 6px;border:none;background:transparent;color:#fff;cursor:pointer;white-space:nowrap}
-.hd-nav button:hover{background:rgba(255,255,255,.2)}
-.hd-nav select{font-family:inherit;font-size:13px;padding:1px 2px;border:1px solid rgba(255,255,255,.35);border-radius:3px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}
-.hd-nav select option{color:#333}
+.hd-nav{display:flex;align-items:center;gap:4px;font-size:13px;flex-wrap:wrap}
+.hd-nav button{font-family:inherit;font-size:13px;padding:5px 10px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;border-radius:4px}
+.hd-nav button:hover{background:rgba(255,255,255,.3)}
+.hd-nav select{font-family:inherit;font-size:13px;padding:4px 6px;border:1px solid rgba(255,255,255,.4);border-radius:4px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
+.hd-nav select option{color:#333;background:#fff}
+.hd-nav span{color:rgba(255,255,255,.7);margin:0 2px;font-size:12px}
+
+/* 表格 */
 table{width:100%;table-layout:fixed;border-collapse:collapse}
-thead td{background:#f0f4fb;padding:8px 0;font-weight:600;color:#555;text-align:center;border-bottom:2px solid #245eaf;font-size:13px}
-thead td.sun{color:#C81115}
-thead td.sat{color:#1F6529}
-td.cell{text-align:center;padding:3px 2px;vertical-align:top;font-size:13px;border:1px solid #f0f0f0;height:64px;overflow:hidden}
-td.cell:hover{background:#eef3ff}
-td.cell .day{font-size:15px;font-weight:600;margin-bottom:1px}
-td.cell .lunar{font-size:11px;color:#888;line-height:1.4}
-td.cell .lunar.month{color:#245eaf;font-weight:700}
-td.cell .term{font-size:11px;color:#0a7a3e;line-height:1.4}
+thead td{background:#f0f4fb;padding:10px 0;font-weight:700;color:#555;text-align:center;border-bottom:2px solid var(--primary);font-size:14px;letter-spacing:2px}
+thead td.weekend{font-weight:800}
+thead td.sun{color:#d63031}
+thead td.sat{color:#27ae60}
+
+/* 日期单元格 */
+td.cell{text-align:center;padding:5px 2px 3px;vertical-align:top;border:1px solid var(--bdr);height:62px;overflow:hidden}
+td.cell:hover{background:#f5f8ff}
+td.cell .day{font-size:17px;font-weight:700;margin-bottom:1px;color:var(--text)}
+td.cell .lunar{font-size:11px;color:var(--text-m);line-height:1.3;font-weight:500}
+td.cell .lunar.month{color:var(--primary);font-weight:700}
+
+/* 标签：节气/放假/上班/占位 */
+td.cell .term,
+td.cell .holiday,
+td.cell .workday,
+td.cell .tag-empty{font-size:11px;line-height:1.3;margin-top:2px;padding:1px 4px;border-radius:2px;display:inline-block}
+td.cell .term{color:#0a8a3e;background:rgba(10,138,62,.15)}
+td.cell .holiday{color:#c0392b;background:rgba(231,76,60,.15)}
+td.cell .workday{color:#d35400;background:rgba(243,156,18,.15)}
+td.cell .tag-empty{visibility:hidden}
+
+/* 其他月份 */
 td.other{background:#fafafa}
-td.other .day{color:#ccc !important}
-td.other .lunar{color:#ddd !important}
-td.cell.today{background:#dce6f7}
+td.other .day{color:#bbb!important}
+td.other .lunar,
+td.other .term,
+td.other .holiday,
+td.other .workday{color:#ccc!important;background:transparent!important}
+
+/* 今天 */
+td.cell.today{background:#e8f0fe;box-shadow:inset 0 0 0 2px var(--primary)}
+td.cell.today .day{color:var(--primary)!important}
+
+/* 响应式 */
+@media(max-width:768px){
+  .hd{padding:8px 10px;flex-direction:column;gap:6px}
+  .hd-title{font-size:16px;text-align:center;width:100%}
+  .hd-nav{width:100%;justify-content:center;font-size:12px}
+  .hd-nav button{padding:5px 8px;font-size:12px}
+  .hd-nav select{padding:3px 4px;font-size:12px}
+  td.cell .day{font-size:14px}
+  td.cell .lunar,
+  td.cell .term,
+  td.cell .holiday,
+  td.cell .workday,
+  td.cell .tag-empty{font-size:9px}
+}
+@media(max-width:480px){
+  .wrap{width:100vw;border-radius:0;box-shadow:none}
+  .hd{padding:6px 8px}
+  .hd-title{font-size:15px}
+  .hd-nav{justify-content:space-between;font-size:11px;gap:2px}
+  .hd-nav button{padding:4px 6px;font-size:11px;flex:1;max-width:60px}
+  .hd-nav select{padding:2px 3px;font-size:11px}
+  td.cell .day{font-size:13px}
+  td.cell .lunar,
+  td.cell .term,
+  td.cell .holiday,
+  td.cell .workday,
+  td.cell .tag-empty{font-size:8px}
+}
 </style>
 </head>
 <body>
@@ -36,23 +99,22 @@ td.cell.today{background:#dce6f7}
   <div class="hd">
     <div class="hd-title" id="hdTitle"></div>
     <div class="hd-nav">
-      <button onclick="chg(-1)">&#9664; 上月</button>
-      <select id="sy"></select>
-      <span style="color:rgba(255,255,255,.5);margin:0 1px;font-size:12px">年</span>
-      <select id="sm"></select>
-      <span style="color:rgba(255,255,255,.5);margin:0 1px;font-size:12px">月</span>
-      <button onclick="chg(1)">下月 &#9654;</button>
+      <button onclick="chg(-1)">&#9664;上月</button>
+      <select id="sy"></select><span>年</span>
+      <select id="sm"></select><span>月</span>
+      <button onclick="chg(1)">下月&#9654;</button>
       <button onclick="goToday()">今天</button>
     </div>
   </div>
   <table>
     <thead><tr>
-      <td class="sun">日</td><td>一</td><td>二</td><td>三</td><td>四</td><td>五</td><td class="sat">六</td>
+      <td class="sun weekend">日</td><td>一</td><td>二</td><td>三</td><td>四</td><td>五</td><td class="sat weekend">六</td>
     </tr></thead>
     <tbody id="tb"></tbody>
   </table>
 </div>
 <script>
+/* ========== 农历数据 ========== */
 var L=[0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0cab5,0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,0x05aa0,0x076a3,0x096d0,0x04bd7,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,0x14b63];
 var G=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
 var Z=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
@@ -62,99 +124,93 @@ var LD=["初一","初二","初三","初四","初五","初六","初七","初八",
 var ST=["小寒","大寒","立春","雨水","惊蛰","春分","清明","谷雨","立夏","小满","芒种","夏至","小暑","大暑","立秋","处暑","白露","秋分","寒露","霜降","立冬","小雪","大雪","冬至"];
 var STI=[0,21208,42467,63836,85337,107014,128867,150921,173149,195551,218072,240693,263343,285989,308563,331033,353350,375494,397447,419210,440795,462224,483532,504758];
 
-function lYearDays(y){
-  var s=348,i=0x8000;
-  for(;i>0x8;i>>=1){ if((L[y-1900]&i)!==0) s++; }
-  return s+((L[y-1900]&0xf)===0?0:((L[y-1900]&0x10000)!==0?30:29));
+/* ========== 法定节假日安排 ========== */
+var HOLIDAYS=[
+  {name:"元旦",dates:["2026-01-01","2026-01-02","2026-01-03"],workdays:["2026-01-04"]},
+  {name:"春节",dates:["2026-02-15","2026-02-16","2026-02-17","2026-02-18","2026-02-19","2026-02-20","2026-02-21","2026-02-22","2026-02-23"],workdays:["2026-02-14","2026-02-28"]},
+  {name:"清明节",dates:["2026-04-04","2026-04-05","2026-04-06"],workdays:[]},
+  {name:"劳动节",dates:["2026-05-01","2026-05-02","2026-05-03","2026-05-04","2026-05-05"],workdays:["2026-05-09"]},
+  {name:"端午节",dates:["2026-06-19","2026-06-20","2026-06-21"],workdays:[]},
+  {name:"中秋节",dates:["2026-09-25","2026-09-26","2026-09-27"],workdays:[]},
+  {name:"国庆节",dates:["2026-10-01","2026-10-02","2026-10-03","2026-10-04","2026-10-05","2026-10-06","2026-10-07"],workdays:["2026-09-20","2026-10-10"]}
+];
+function checkHoliday(y,m,d){
+  var s=y+"-"+String(m).padStart(2,'0')+"-"+String(d).padStart(2,'0');
+  for(var i=0;i<HOLIDAYS.length;i++){
+    var h=HOLIDAYS[i];
+    if(h.dates.indexOf(s)!==-1)return"holiday";
+    if(h.workdays&&h.workdays.indexOf(s)!==-1)return"workday"
+  }
+  return null
 }
-function leapMonth(y){ return L[y-1900]&0xf; }
-function leapDays(y){
-  if((L[y-1900]&0xf)===0) return 0;
-  return (L[y-1900]&0x10000)!==0?30:29;
-}
-function monthDays(y,m){ return (L[y-1900]&(0x10000>>m))!==0?30:29; }
 
+/* ========== 农历计算 ========== */
+function lYearDays(y){var s=348,i=0x8000;for(;i>0x8;i>>=1){if((L[y-1900]&i)!==0)s++}return s+((L[y-1900]&0xf)===0?0:((L[y-1900]&0x10000)!==0?30:29))}
+function leapMonth(y){return L[y-1900]&0xf}
+function leapDays(y){if((L[y-1900]&0xf)===0)return 0;return(L[y-1900]&0x10000)!==0?30:29}
+function monthDays(y,m){return(L[y-1900]&(0x10000>>m))!==0?30:29}
 function s2l(yy,mm,dd){
-  if(yy<1900||yy>2100) return null;
-  var offset=Math.floor((Date.UTC(yy,mm-1,dd)-Date.UTC(1900,0,31))/86400000);
-  var i,temp;
-  for(i=1900;i<2101&&offset>0;i++){ temp=lYearDays(i); offset-=temp; }
-  if(offset<0){ offset+=temp; i--; }
+  if(yy<1900||yy>2100)return null;
+  var offset=Math.floor((Date.UTC(yy,mm-1,dd)-Date.UTC(1900,0,31))/86400000),i,temp;
+  for(i=1900;i<2101&&offset>0;i++){temp=lYearDays(i);offset-=temp}
+  if(offset<0){offset+=temp;i--}
   var year=i,leapM=leapMonth(year),isLeap=false;
   for(i=1;i<13&&offset>0;i++){
-    if(leapM>0&&i===(leapM+1)&&!isLeap){ --i; isLeap=true; temp=leapDays(year); }
-    else { temp=monthDays(year,i); }
-    if(isLeap&&i===(leapM+1)) isLeap=false;
-    offset-=temp;
+    if(leapM>0&&i===(leapM+1)&&!isLeap){--i;isLeap=true;temp=leapDays(year)}
+    else{temp=monthDays(year,i)}
+    if(isLeap&&i===(leapM+1))isLeap=false;
+    offset-=temp
   }
-  if(offset===0&&leapM>0&&i===(leapM+1)){
-    if(isLeap){ isLeap=false; }else{ isLeap=true; --i; }
-  }
-  if(offset<0){ offset+=temp; --i; }
-  return {year:year,month:i,day:offset+1,isLeap:isLeap};
+  if(offset===0&&leapM>0&&i===(leapM+1)){if(isLeap){isLeap=false}else{isLeap=true;--i}}
+  if(offset<0){offset+=temp;--i}
+  return{year:year,month:i,day:offset+1,isLeap:isLeap}
 }
-function cyclical(n){ return G[n%10]+Z[n%12]; }
-function sTerm(y,n){
-  var t=31556925974.7*(y-1900)+STI[n]*60000+Date.UTC(1900,0,6,2,5);
-  return new Date(t).getUTCDate();
-}
+function cyclical(n){return G[n%10]+Z[n%12]}
+function sTerm(y,n){var t=31556925974.7*(y-1900)+STI[n]*60000+Date.UTC(1900,0,6,2,5);return new Date(t).getUTCDate()}
 
-var Y=new Date().getFullYear(), M=new Date().getMonth();
-var TODAY=new Date();
-var sy=document.getElementById("sy"),sm=document.getElementById("sm");
-for(var i=1900;i<=2100;i++) sy.add(new Option(i,i));
-for(var i=1;i<=12;i++) sm.add(new Option(i,i));
-sy.onchange=function(){ Y=parseInt(this.value,10); render(); };
-sm.onchange=function(){ M=parseInt(this.value,10)-1; render(); };
+/* ========== 主程序 ========== */
+var Y=new Date().getFullYear(),M=new Date().getMonth(),TODAY=new Date(),
+  sy=document.getElementById("sy"),sm=document.getElementById("sm"),
+  tb=document.getElementById("tb"),hdTitle=document.getElementById("hdTitle");
+for(var i=1900;i<=2100;i++)sy.add(new Option(i,i));
+for(var i=1;i<=12;i++)sm.add(new Option(i,i));
+sy.onchange=function(){Y=parseInt(this.value,10);render()};
+sm.onchange=function(){M=parseInt(this.value,10)-1;render()};
 
+var SUN="#d63031",SAT="#27ae60";
 function render(){
-  sy.value=Y; sm.value=M+1;
-  var tInfo=s2l(Y,M+1,1);
-  var lunarYearStr="万年历";
-  if(tInfo){
-    var dYear=tInfo.year, yIdx=dYear-1900+36;
-    lunarYearStr=cyclical(yIdx)+A[(dYear-4)%12]+"年";
-  }
-  document.getElementById("hdTitle").innerHTML=lunarYearStr;
-  var fd=new Date(Y,M,1).getDay(), totalCells=42;
-  var t1=sTerm(Y,M*2), t2=sTerm(Y,M*2+1);
-  var html="";
-  for(var i=0;i<totalCells;i++){
-    if(i%7===0) html+="<tr>";
-    var d=new Date(Y,M,i-fd+1);
-    var day=d.getDate(), dow=d.getDay();
-    var isOther=(d.getMonth()!==M);
-    var ln=s2l(d.getFullYear(),d.getMonth()+1,day);
-    var cls="cell", dayColor="#333", lh="", th="";
+  sy.value=Y;sm.value=M+1;
+  var tInfo=s2l(Y,M+1,1),title="万年历";
+  if(tInfo){var yIdx=tInfo.year-1900+36;title=cyclical(yIdx)+A[(tInfo.year-4)%12]+"年"}
+  hdTitle.innerHTML=title;
+  var fd=new Date(Y,M,1).getDay(),t1=sTerm(Y,M*2),t2=sTerm(Y,M*2+1),html="";
+  for(var i=0;i<42;i++){
+    if(i%7===0)html+="<tr>";
+    var d=new Date(Y,M,i-fd+1),day=d.getDate(),dow=d.getDay(),
+      isOther=d.getMonth()!==M,
+      ln=s2l(d.getFullYear(),d.getMonth()+1,day),
+      cls="cell",dc="",lh="",tag='';
     if(ln){
-      if(ln.day===1&&!isOther) lh='<div class="lunar month">'+LM[ln.month-1]+'月</div>';
-      else if(!isOther) lh='<div class="lunar">'+LD[ln.day-1]+'</div>';
-      if(!isOther){
-        if(day===t1) th='<div class="term">'+ST[M*2]+'</div>';
-        if(day===t2) th='<div class="term">'+ST[M*2+1]+'</div>';
-      }
-      if(isOther) cls+=" other";
+      lh=ln.day===1?'<div class="lunar month">'+LM[ln.month-1]+'月</div>':'<div class="lunar">'+LD[ln.day-1]+'</div>';
+      if(isOther){cls+=" other"}
       else{
-        if(dow===0) dayColor="#C81115";
-        else if(dow===6) dayColor="#1F6529";
-        if(day===TODAY.getDate()&&d.getMonth()===TODAY.getMonth()&&d.getFullYear()===TODAY.getFullYear()) cls+=" today";
+        if(dow===0)dc=SUN;else if(dow===6)dc=SAT;
+        if(day===TODAY.getDate()&&d.getMonth()===TODAY.getMonth()&&d.getFullYear()===TODAY.getFullYear())cls+=" today"
       }
-      html+='<td class="'+cls+'"><div class="day" style="color:'+dayColor+'">'+day+'</div>'+lh+th+'</td>';
-    }else{
-      html+='<td class="cell other"></td>';
-    }
-    if(i%7===6) html+="</tr>";
+      var ht=checkHoliday(d.getFullYear(),d.getMonth()+1,day);
+      if(ht==="workday")tag='<div class="workday">上班</div>';
+      else if(ht==="holiday")tag='<div class="holiday">放假</div>';
+      else if(day===t1)tag='<div class="term">'+ST[M*2]+'</div>';
+      else if(day===t2)tag='<div class="term">'+ST[M*2+1]+'</div>';
+      if(!tag)tag='<div class="tag-empty">&nbsp;</div>';
+      html+='<td class="'+cls+'"><div class="day" style="color:'+dc+'">'+day+'</div>'+lh+tag+'</td>'
+    }else{html+='<td class="cell other"></td>'}
+    if(i%7===6)html+="</tr>"
   }
-  document.getElementById("tb").innerHTML=html;
+  tb.innerHTML=html
 }
-function chg(d){
-  M+=d;
-  var yr=Y+Math.floor(M/12);
-  M=((M%12)+12)%12;
-  Y=yr;
-  render();
-}
-function goToday(){ Y=new Date().getFullYear(); M=new Date().getMonth(); render(); }
+function chg(d){M+=d;var yr=Y+Math.floor(M/12);M=((M%12)+12)%12;Y=yr;render()}
+function goToday(){Y=new Date().getFullYear();M=new Date().getMonth();render()}
 render();
 </script>
 </body>
